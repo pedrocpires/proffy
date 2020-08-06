@@ -64,6 +64,16 @@
         "ExportDeclaration": { "multiline": true, "minProperties": 3 }
       }
     ],
-    "comma-dangle": ["error", { "functions": "ignore" }]
+    "comma-dangle": [
+      "error",
+      {
+        "arrays": "ignore",
+        "objects": "ignore",
+        // "imports": "never",
+        // "exports": "never",
+        "functions": "ignore"
+      }
+    ],
+    "react/jsx-props-no-spreading": ["off"]
   }
 }
