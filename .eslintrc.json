@@ -58,8 +58,8 @@
     "object-curly-newline": [
       "error",
       {
-        "ObjectExpression": "always",
-        "ObjectPattern": { "multiline": true },
+        "ObjectExpression": { "multiline": true, "minProperties": 1 },
+        "ObjectPattern": [{ "multiline": true }],
         "ImportDeclaration": "never",
         "ExportDeclaration": { "multiline": true, "minProperties": 3 }
       }
@@ -74,6 +74,8 @@
         "functions": "ignore"
       }
     ],
-    "react/jsx-props-no-spreading": ["off"]
+    "react/jsx-props-no-spreading": ["off"],
+    "react/jsx-one-expression-per-line": ["off"],
+    "camelcase": ["error", { "allow": ["week_day", "user_id"] }]
   }
 }

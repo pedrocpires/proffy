@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+// eslint-disable-next-line no-unused-vars
+import React, { useState, FormEvent } from "react";
+import { useHistory } from "react-router-dom";
 
 import "./styles.css";
 import PageHeader from "../../components/PageHeader";
@@ -6,14 +8,21 @@ import Input from "../../components/Input";
 import warningIcon from "../../assets/images/icons/warning.svg";
 import Textarea from "../../components/Textarea";
 import Select from "../../components/Select";
+import api from "../../services/api";
 
 function TeacherForm() {
+  const history = useHistory();
+
+  const [name, setName] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [bio, setBio] = useState("");
+
+  const [subject, setSubject] = useState("");
+  const [cost, setCost] = useState("");
+
   const [scheduleItems, setScheduleItems] = useState([
-    {
-      week_day: 0,
-      from: "",
-      to: "",
-    },
+    { week_day: 0, from: "", to: "" },
   ]);
 
   function addNewScheduleitem() {
@@ -27,6 +36,44 @@ function TeacherForm() {
     ]);
   }
 
+  function setScheduleItemValue(
+    position: number,
+    field: string,
+    value: string
+  ) {
+    const updatedScheduleItems = scheduleItems.map((scheduleItem, index) => {
+      if (index === position) {
+        return { ...scheduleItem, [field]: value };
+      }
+      return scheduleItem;
+    });
+    setScheduleItems(updatedScheduleItems);
+  }
+
+  function handleCreateClass(e: FormEvent) {
+    e.preventDefault();
+
+    api
+      .post("/classes", {
+        name,
+        avatar,
+        whatsapp,
+        bio,
+        subject,
+        cost: Number(cost),
+        schedule: scheduleItems,
+      })
+      .then(() => {
+        // eslint-disable-next-line no-alert
+        alert("Cadastro realizado com sucesso!");
+        history.push("/");
+      })
+      .catch(() => {
+        // eslint-disable-next-line no-alert
+        alert("Erro no cadastro!");
+      });
+  }
+
   return (
     <div id="page-teacher-form" className="container">
       <PageHeader
@@ -35,72 +82,133 @@ function TeacherForm() {
       />
 
       <main>
-        <fieldset>
-          <legend>Seus dados</legend>
-          <Input name="name" label="Nome Completo" />
-          <Input name="avatar" label="Avatar" />
-          <Input name="whatsapp" label="WhatsApp" />
-          <Textarea name="bio" label="Biografia" />
-        </fieldset>
+        <form action="" onSubmit={handleCreateClass}>
+          <fieldset>
+            <legend>Seus dados</legend>
+            <Input
+              name="name"
+              label="Nome Completo"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+              }}
+            />
+            <Input
+              name="avatar"
+              label="Avatar"
+              value={avatar}
+              onChange={(e) => {
+                setAvatar(e.target.value);
+              }}
+            />
+            <Input
+              name="whatsapp"
+              label="WhatsApp"
+              value={whatsapp}
+              onChange={(e) => {
+                setWhatsapp(e.target.value);
+              }}
+            />
+            <Textarea
+              name="bio"
+              label="Biografia"
+              value={bio}
+              onChange={(e) => {
+                setBio(e.target.value);
+              }}
+            />
+          </fieldset>
 
-        <fieldset>
-          <legend>Sobre a Aula</legend>
-          <Select
-            name="subject"
-            label="Matéria"
-            options={[
-              { value: "Artes", tag: "Artes" }, // eslint-disable-line object-curly-newline
-              { value: "Biologia", tag: "Biologia" }, // eslint-disable-line object-curly-newline
-              { value: "Ciências", tag: "Ciências" }, // eslint-disable-line object-curly-newline
-              { value: "Educação Física", tag: "Educação Física" }, // eslint-disable-line object-curly-newline
-              { value: "Física", tag: "Física" }, // eslint-disable-line object-curly-newline
-              { value: "Geografia", tag: "Geografia" }, // eslint-disable-line object-curly-newline
-              { value: "História", tag: "História" }, // eslint-disable-line object-curly-newline
-              { value: "Matemática", tag: "Matemática" }, // eslint-disable-line object-curly-newline
-              { value: "Português", tag: "Português" }, // eslint-disable-line object-curly-newline
-              { value: "Química", tag: "Química" }, // eslint-disable-line object-curly-newline, comma-dangle
-            ]}
-          />
-          <Input name="cost" label="Custo da sua hora por aula" />
-        </fieldset>
+          <fieldset>
+            <legend>Sobre a Aula</legend>
+            <Select
+              name="subject"
+              label="Matéria"
+              value={subject}
+              onChange={(e) => {
+                setSubject(e.target.value);
+              }}
+              options={[
+                { value: "Artes", tag: "Artes" },
+                { value: "Biologia", tag: "Biologia" },
+                { value: "Ciências", tag: "Ciências" },
+                { value: "Educação Física", tag: "Educação Física" },
+                { value: "Física", tag: "Física" },
+                { value: "Geografia", tag: "Geografia" },
+                { value: "História", tag: "História" },
+                { value: "Matemática", tag: "Matemática" },
+                { value: "Português", tag: "Português" },
+                { value: "Química", tag: "Química" },
+              ]}
+            />
+            <Input
+              name="cost"
+              label="Custo da sua hora por aula"
+              value={cost}
+              onChange={(e) => {
+                setCost(e.target.value);
+              }}
+            />
+          </fieldset>
 
-        <fieldset>
-          <legend>
-            Horários disponíveis
-            <button type="button" onClick={addNewScheduleitem}>
-              + Novo horário
-            </button>
-          </legend>
+          <fieldset>
+            <legend>
+              Horários disponíveis
+              <button type="button" onClick={addNewScheduleitem}>
+                + Novo horário
+              </button>
+            </legend>
 
-          {scheduleItems.map((scheduleItem) => (
-            <div key={scheduleItem.week_day} className="schedule-item">
-              <Select
-                name="week_day"
-                label="Dia da Semana"
-                options={[
-                  { value: "0", tag: "Domingo" }, // eslint-disable-line object-curly-newline
-                  { value: "1", tag: "Segunda-feira" }, // eslint-disable-line object-curly-newline
-                  { value: "2", tag: "Terça-feira" }, // eslint-disable-line object-curly-newline
-                  { value: "3", tag: "Quarta-feira" }, // eslint-disable-line object-curly-newline
-                  { value: "4", tag: "Quinta-feira" }, // eslint-disable-line object-curly-newline
-                  { value: "5", tag: "Sexta-feira" }, // eslint-disable-line object-curly-newline
-                  { value: "6", tag: "Sábado" }, // eslint-disable-line object-curly-newline, comma-dangle
-                ]}
-              />
-              <Input name="from" label="Das" type="time" />
-              <Input name="to" label="Até" type="time" />
-            </div>
-          ))}
-        </fieldset>
-        <footer>
-          <p>
-            <img src={warningIcon} alt="Aviso importante" />
-            Importante!
-            <br />
-            Preencha todos os dados.
-          </p>
-          <button type="button">Salvar cadastro</button>
-        </footer>
+            {scheduleItems.map((scheduleItem, index) => (
+              <div key={scheduleItem.week_day} className="schedule-item">
+                <Select
+                  name="week_day"
+                  label="Dia da Semana"
+                  value={scheduleItem.week_day}
+                  onChange={(e) => {
+                    setScheduleItemValue(index, "week_day", e.target.value);
+                  }}
+                  options={[
+                    { value: "0", tag: "Domingo" },
+                    { value: "1", tag: "Segunda-feira" },
+                    { value: "2", tag: "Terça-feira" },
+                    { value: "3", tag: "Quarta-feira" },
+                    { value: "4", tag: "Quinta-feira" },
+                    { value: "5", tag: "Sexta-feira" },
+                    { value: "6", tag: "Sábado" },
+                  ]}
+                />
+                <Input
+                  name="from"
+                  label="Das"
+                  type="time"
+                  value={scheduleItem.from}
+                  onChange={(e) => {
+                    setScheduleItemValue(index, "from", e.target.value);
+                  }}
+                />
+                <Input
+                  name="to"
+                  label="Até"
+                  type="time"
+                  value={scheduleItem.to}
+                  onChange={(e) => {
+                    setScheduleItemValue(index, "to", e.target.value);
+                  }}
+                />
+              </div>
+            ))}
+          </fieldset>
+          <footer>
+            <p>
+              <img src={warningIcon} alt="Aviso importante" />
+              Importante!
+              <br />
+              Preencha todos os dados.
+            </p>
+            <button type="submit">Salvar cadastro</button>
+          </footer>
+        </form>
       </main>
     </div>
   );
